@@ -1,4 +1,1 @@
-supybot-Bierwiki
-================
-
-Ugly first try of a supybot plugin.
+Yes it's ugly, don't use it.
