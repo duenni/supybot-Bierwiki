@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ###
 # Copyright (c) 2013, duenni
 # All rights reserved.
@@ -46,14 +47,21 @@ class Bierwiki(callbacks.Plugin):
     This should describe *how* to use this plugin."""
     threaded = True
     
-    def bw(self, irc, msg, args, searchterm):
+    def bwlink(self, irc, msg, args, searchterm):
         """<searchterm>
         Sucht im Massawiki nach Bier    
         """
-        #Grab and open URL, create BeatifulSoup object
+       
         url = "http://www.massafaka.at/massawiki/doku.php?id=bier:almanach"
-        page = urllib2.urlopen(url)
-        soup = BeautifulSoup(page.read())
+        
+        try:
+            page = urllib2.urlopen(url)
+            soup = BeautifulSoup(page.read())
+            
+        except: 
+            irc.reply("Ich konnte das Wiki nicht öffnen.")
+            return
+        
         #Grab Table of Contents
         grab_toc = soup.find('div', {"id":"dw__toc"})
         #Regex fu
@@ -64,7 +72,7 @@ class Bierwiki(callbacks.Plugin):
         #print matching_link['href']
         irc.reply("http://www.massafaka.at/massawiki/doku.php?id=bier:almanach%s" % matching_link['href'])
         
-    bw = wrap(bw, [('somethingWithoutSpaces')])
+    bwlink = wrap(bwlink, [('somethingWithoutSpaces')])
 
 
 Class = Bierwiki
