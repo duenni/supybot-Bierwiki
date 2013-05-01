@@ -30,8 +30,9 @@
 ###
 
 import re
-from bs4 import BeautifulSoup
-import urllib2
+import lxml.html
+import lxml.cssselect
+import itertools
 import supybot.utils as utils
 from supybot.commands import *
 import supybot.plugins as plugins
@@ -51,28 +52,37 @@ class Bierwiki(callbacks.Plugin):
         """<searchterm>
         Sucht im Massawiki nach Bier    
         """
-       
-        url = "http://www.massafaka.at/massawiki/doku.php?id=bier:almanach"
-        
         try:
-            page = urllib2.urlopen(url)
-            soup = BeautifulSoup(page.read())
-            
+            html = lxml.html.parse("http://www.massafaka.at/massawiki/doku.php?id=bier:almanach").getroot()
+            result=html.cssselect('ul.toc li.level2 div.li a')        
         except: 
             irc.reply("Ich konnte das Wiki nicht öffnen.")
             return
-        
-        #Grab Table of Contents
-        grab_toc = soup.find('div', {"id":"dw__toc"})
-        #Regex fu
-        matching_link = grab_toc.find('a', text=re.compile(searchterm, re.IGNORECASE))
 
-        #print matching_link.string
-        irc.reply(matching_link.string)
-        #print matching_link['href']
-        irc.reply("http://www.massafaka.at/massawiki/doku.php?id=bier:almanach%s" % matching_link['href'])
+        regex = re.compile(searchterm, re.IGNORECASE)
+        name = []
+        link = []
+        for a in result:
+            for b in regex.finditer(a.text_content()):
+                name.append(a.text_content())                
+                link.append(a.get('href'))
+
+        if name: #if list is not empty, which would return 'false'
+            for a,b in itertools.izip(name, link): #loop over 2 lists with itertools
+                irc.reply(a, prefixNick=False)
+                irc.reply('http://www.massafaka.at/massawiki/doku.php?id=bier:almanach'+b, prefixNick=False)
+        else:
+            irc.reply('Nichts gefunden')
         
-    bwlink = wrap(bwlink, [('somethingWithoutSpaces')])
+
+        #resulttext=html.xpath("//ul[@class='toc']/li[@class='level2']/div[@class='li']/a/text()[contains(.,%r)]"%searchterm)
+        #resultlink=html.xpath("//ul[@class='toc']/li[@class='level2']/div[@class='li']/a[text()[contains(.,%r)]]/@href"%searchterm)
+        
+        #for elem in result
+            #irc.reply(elem.text_content())
+            #irc.reply('http://www.massafaka.at/massawiki/doku.php?id=bier:almanach'+elem.get('href'))
+
+    bwlink = wrap(bwlink, [('text')])
 
 
 Class = Bierwiki
