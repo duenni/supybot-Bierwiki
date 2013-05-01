@@ -84,7 +84,28 @@ class Bierwiki(callbacks.Plugin):
 
     bwlink = wrap(bwlink, [('text')])
 
+    def bwlatest(self, irc, msg, args):
+        """
+        Gibt die letzten Änderungen im Wiki aus.
+        """
+        try:
+            html = lxml.html.parse("http://www.massafaka.at/massawiki/doku.php?id=bier:almanach&do=revisions").getroot()     
+        except: 
+            irc.reply("Ich konnte das Wiki nicht öffnen.")
+            return
 
+        latest = []
+        for a in html.cssselect("div.li"):
+            latest.append(a.text_content())
+
+        if latest:
+            for i in range(0,5):
+                irc.reply(u' '.join([x.strip() for x in latest[i].splitlines() if x.strip()]), prefixNick=False)
+        else:
+            irc.reply('Liste ist leer.')
+        
+
+    bwlatest = wrap(bwlatest)
 Class = Bierwiki
 
 
