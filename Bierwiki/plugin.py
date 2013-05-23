@@ -44,68 +44,63 @@ _ = PluginInternationalization('Bierwiki')
 
 @internationalizeDocstring
 class Bierwiki(callbacks.Plugin):
-    """Add the help for "@plugin help Bierwiki" here
-    This should describe *how* to use this plugin."""
-    threaded = True
+	"""Add the help for "@plugin help Bierwiki" here
+	This should describe *how* to use this plugin."""
+	threaded = True
     
-    def bwlink(self, irc, msg, args, searchterm):
-        """<searchterm>
-        Sucht im Massawiki nach Bier    
-        """
-        try:
-            html = lxml.html.parse("http://www.massafaka.at/massawiki/doku.php?id=bier:almanach").getroot()
-            result=html.cssselect('ul.toc li.level2 div.li a')        
-        except: 
-            irc.reply("Ich konnte das Wiki nicht öffnen.")
-            return
+	def bwlink(self, irc, msg, args, searchterm):
+		"""<searchterm>
+		Sucht im Massawiki nach Bier    
+		"""
+		try:
+			html = lxml.html.parse("http://www.massafaka.at/massawiki/doku.php?id=bier:almanach").getroot()
+			result=html.cssselect('ul.toc li.level2 div.li a')        
+		except: 
+			irc.reply("Ich konnte das Wiki nicht öffnen.")
+			return
 
-        regex = re.compile(searchterm, re.IGNORECASE)
-        name = []
-        link = []
-        for a in result:
-            for b in regex.finditer(a.text_content()):
-                name.append(a.text_content())                
-                link.append(a.get('href'))
+		regex = re.compile(searchterm, re.IGNORECASE)
+		name = []
+		link = []
+		if len(searchterm) >= 3:
+			for a in result:
+				for b in regex.finditer(a.text_content()):
+					name.append(a.text_content())                
+					link.append(a.get('href'))
+		else:
+			irc.reply("Suchwort muss mindestens 3 Zeichen enthalten.")
 
-        if name: #if list is not empty, which would return 'false'
-            for a,b in itertools.izip(name, link): #loop over 2 lists with itertools
-                irc.reply(a, prefixNick=False)
-                irc.reply('http://www.massafaka.at/massawiki/doku.php?id=bier:almanach'+b, prefixNick=False)
-        else:
-            irc.reply('Nichts gefunden')
+		if name: #if list is not empty, which would return 'false'
+			for a,b in itertools.izip(name, link): #loop over 2 lists with itertools
+				irc.reply(a, prefixNick=False)
+				irc.reply('http://www.massafaka.at/massawiki/doku.php?id=bier:almanach'+b, prefixNick=False)
+		else:
+			irc.reply('Nichts gefunden')
+
+	bwlink = wrap(bwlink, [('text')])
+
+	def bwlatest(self, irc, msg, args):
+		"""
+		Gibt die letzten Änderungen im Wiki aus.
+		"""
+		try:
+			html = lxml.html.parse("http://www.massafaka.at/massawiki/doku.php?id=bier:almanach&do=revisions").getroot()     
+		except: 
+			irc.reply("Ich konnte das Wiki nicht öffnen.")
+			return
+
+		latest = []
+		for a in html.cssselect("div.li"):
+			latest.append(a.text_content())
+
+		if latest:
+			for i in range(0,5):
+				irc.reply(u' '.join([x.strip() for x in latest[i].splitlines() if x.strip()]), prefixNick=False)
+		else:
+			irc.reply('Liste ist leer.')
         
 
-        #resulttext=html.xpath("//ul[@class='toc']/li[@class='level2']/div[@class='li']/a/text()[contains(.,%r)]"%searchterm)
-        #resultlink=html.xpath("//ul[@class='toc']/li[@class='level2']/div[@class='li']/a[text()[contains(.,%r)]]/@href"%searchterm)
-        
-        #for elem in result
-            #irc.reply(elem.text_content())
-            #irc.reply('http://www.massafaka.at/massawiki/doku.php?id=bier:almanach'+elem.get('href'))
-
-    bwlink = wrap(bwlink, [('text')])
-
-    def bwlatest(self, irc, msg, args):
-        """
-        Gibt die letzten Änderungen im Wiki aus.
-        """
-        try:
-            html = lxml.html.parse("http://www.massafaka.at/massawiki/doku.php?id=bier:almanach&do=revisions").getroot()     
-        except: 
-            irc.reply("Ich konnte das Wiki nicht öffnen.")
-            return
-
-        latest = []
-        for a in html.cssselect("div.li"):
-            latest.append(a.text_content())
-
-        if latest:
-            for i in range(0,5):
-                irc.reply(u' '.join([x.strip() for x in latest[i].splitlines() if x.strip()]), prefixNick=False)
-        else:
-            irc.reply('Liste ist leer.')
-        
-
-    bwlatest = wrap(bwlatest)
+	bwlatest = wrap(bwlatest)
 Class = Bierwiki
 
 
