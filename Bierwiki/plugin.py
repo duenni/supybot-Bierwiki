@@ -75,7 +75,7 @@ class Bierwiki(callbacks.Plugin):
 				irc.reply(a, prefixNick=False)
 				irc.reply('http://www.massafaka.at/massawiki/doku.php?id=bier:almanach'+b, prefixNick=False)
 		else:
-			irc.reply("Nichts gefunden", prefixNick=False)
+			irc.reply("Nichts gefunden.", prefixNick=False)
 
 	bwlink = wrap(bwlink, [('text')])
 
