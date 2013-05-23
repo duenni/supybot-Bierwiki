@@ -50,13 +50,13 @@ class Bierwiki(callbacks.Plugin):
     
 	def bwlink(self, irc, msg, args, searchterm):
 		"""<searchterm>
-		Sucht im Massawiki nach Bier    
+		Sucht im Massawiki nach Bier und gibt einen Link zurück.    
 		"""
 		try:
 			html = lxml.html.parse("http://www.massafaka.at/massawiki/doku.php?id=bier:almanach").getroot()
 			result=html.cssselect('ul.toc li.level2 div.li a')        
 		except: 
-			irc.reply("Ich konnte das Wiki nicht öffnen.")
+			irc.reply("Ich konnte das Wiki nicht öffnen.", prefixNick=False)
 			return
 
 		regex = re.compile(searchterm, re.IGNORECASE)
@@ -68,14 +68,14 @@ class Bierwiki(callbacks.Plugin):
 					name.append(a.text_content())                
 					link.append(a.get('href'))
 		else:
-			irc.reply("Suchwort muss mindestens 3 Zeichen enthalten.")
+			irc.reply("Suchwort muss mindestens 3 Zeichen enthalten.", prefixNick=False)
 
 		if name: #if list is not empty, which would return 'false'
 			for a,b in itertools.izip(name, link): #loop over 2 lists with itertools
 				irc.reply(a, prefixNick=False)
 				irc.reply('http://www.massafaka.at/massawiki/doku.php?id=bier:almanach'+b, prefixNick=False)
 		else:
-			irc.reply('Nichts gefunden')
+			irc.reply("Nichts gefunden", prefixNick=False)
 
 	bwlink = wrap(bwlink, [('text')])
 
@@ -86,7 +86,7 @@ class Bierwiki(callbacks.Plugin):
 		try:
 			html = lxml.html.parse("http://www.massafaka.at/massawiki/doku.php?id=bier:almanach&do=revisions").getroot()     
 		except: 
-			irc.reply("Ich konnte das Wiki nicht öffnen.")
+			irc.reply("Ich konnte das Wiki nicht öffnen.", prefixNick=False)
 			return
 
 		latest = []
@@ -97,7 +97,7 @@ class Bierwiki(callbacks.Plugin):
 			for i in range(0,5):
 				irc.reply(u' '.join([x.strip() for x in latest[i].splitlines() if x.strip()]), prefixNick=False)
 		else:
-			irc.reply('Liste ist leer.')
+			irc.reply("Liste ist leer.", prefixNick=False)
         
 
 	bwlatest = wrap(bwlatest)
