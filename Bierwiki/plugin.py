@@ -55,17 +55,17 @@ class Bierwiki(callbacks.Plugin):
 		try:
 			html = lxml.html.parse("http://www.massafaka.at/massawiki/doku.php?id=bier:almanach").getroot()
 			result=html.cssselect('ul.toc li.level2 div.li a')        
-		except: 
-			irc.reply("Ich konnte das Wiki nicht öffnen.", prefixNick=False)
+		except Exception, e: 
+			irc.reply("Ich konnte das Wiki nicht öffnen. %s"%e, prefixNick=False)
 			return
 
-		regex = re.compile(searchterm, re.IGNORECASE)
+		regex = re.compile(searchterm.decode("utf-8"), re.IGNORECASE)
 		name = []
 		link = []
 		if len(searchterm) >= 3:
 			for a in result:
-				for b in regex.finditer(a.text_content()):
-					name.append(a.text_content())                
+				for b in regex.finditer(a.text):
+					name.append(a.text)                
 					link.append(a.get('href'))
 		else:
 			irc.reply("Suchwort muss mindestens 3 Zeichen enthalten.", prefixNick=False)
@@ -91,7 +91,7 @@ class Bierwiki(callbacks.Plugin):
 
 		latest = []
 		for a in html.cssselect("div.li"):
-			latest.append(a.text_content())
+			latest.append(a.text)
 
 		if latest:
 			for i in range(0,5):
