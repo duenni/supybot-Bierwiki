@@ -91,7 +91,7 @@ class Bierwiki(callbacks.Plugin):
 
 		latest = []
 		for a in html.cssselect("div.li"):
-			latest.append(a.text)
+			latest.append(a.text_content())
 
 		if latest:
 			for i in range(0,5):
