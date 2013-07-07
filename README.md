@@ -1,4 +1,4 @@
 supybot-Bierwiki
 ================
 
-First ugly supybot plugin
+First ugly Supybot/Limnoria plugin.
